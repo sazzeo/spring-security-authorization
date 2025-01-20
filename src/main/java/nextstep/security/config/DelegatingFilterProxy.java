@@ -2,7 +2,7 @@ package nextstep.security.config;
 
 import org.springframework.web.filter.GenericFilterBean;
 
-import javax.servlet.*;
+import jakarta.servlet.*;
 import java.io.IOException;
 
 public class DelegatingFilterProxy extends GenericFilterBean {
