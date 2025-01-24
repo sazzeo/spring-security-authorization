@@ -6,6 +6,8 @@ import nextstep.security.authentication.AuthenticationException;
 import nextstep.security.authentication.BasicAuthenticationFilter;
 import nextstep.security.authentication.UsernamePasswordAuthenticationFilter;
 import nextstep.security.authorization.CheckAuthenticationFilter;
+import nextstep.security.authorization.SecuredAspect;
+import nextstep.security.authorization.SecuredMethodInterceptor;
 import nextstep.security.config.DefaultSecurityFilterChain;
 import nextstep.security.config.DelegatingFilterProxy;
 import nextstep.security.config.FilterChainProxy;
@@ -15,10 +17,12 @@ import nextstep.security.userdetails.UserDetails;
 import nextstep.security.userdetails.UserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 import java.util.List;
 import java.util.Set;
 
+@EnableAspectJAutoProxy
 @Configuration
 public class SecurityConfig {
 
@@ -37,6 +41,15 @@ public class SecurityConfig {
     public FilterChainProxy filterChainProxy(List<SecurityFilterChain> securityFilterChains) {
         return new FilterChainProxy(securityFilterChains);
     }
+
+    @Bean
+    public SecuredMethodInterceptor securedMethodInterceptor() {
+        return new SecuredMethodInterceptor();
+    }
+//    @Bean
+//    public SecuredAspect securedAspect() {
+//        return new SecuredAspect();
+//    }
 
     @Bean
     public SecurityFilterChain securityFilterChain() {
