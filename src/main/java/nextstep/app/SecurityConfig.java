@@ -1,5 +1,6 @@
 package nextstep.app;
 
+import jakarta.servlet.http.HttpServletRequest;
 import nextstep.app.domain.Member;
 import nextstep.app.domain.MemberRepository;
 import nextstep.security.authentication.AuthenticationException;
@@ -11,11 +12,15 @@ import nextstep.security.config.DelegatingFilterProxy;
 import nextstep.security.config.FilterChainProxy;
 import nextstep.security.config.SecurityFilterChain;
 import nextstep.security.context.SecurityContextHolderFilter;
+import nextstep.security.requestmatcher.AnyRequestMatcher;
+import nextstep.security.requestmatcher.MvcRequestMatcher;
+import nextstep.security.requestmatcher.RequestMatcherEntry;
 import nextstep.security.userdetails.UserDetails;
 import nextstep.security.userdetails.UserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.http.HttpMethod;
 
 import java.util.List;
 import java.util.Set;
@@ -45,11 +50,6 @@ public class SecurityConfig {
         return new SecuredMethodInterceptor(new SecuredAuthorizationManager());
     }
 
-//    @Bean
-//    public SecuredAspect securedAspect() {
-//        return new SecuredAspect();
-//    }
-
 
     @Bean
     public SecurityFilterChain securityFilterChain() {
@@ -58,7 +58,7 @@ public class SecurityConfig {
                         new SecurityContextHolderFilter(),
                         new UsernamePasswordAuthenticationFilter(userDetailsService()),
                         new BasicAuthenticationFilter(userDetailsService()),
-                        new AuthorizationFilter(new RequestAuthorizationManager())
+                        new AuthorizationFilter(requestAuthorizationManager())
                 )
         );
     }
@@ -86,5 +86,17 @@ public class SecurityConfig {
                 }
             };
         };
+    }
+
+    @Bean
+    public RequestAuthorizationManager requestAuthorizationManager() {
+        List<RequestMatcherEntry<AuthorizationManager<HttpServletRequest>>> mappings = List.of(
+                new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/members/me"), new AuthenticatedAuthorizationManager<>()),
+                new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/members"), AuthorityAuthorizationManager.of("ADMIN")),
+                new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/search"), new PermitAllAuthorizationManager<>()),
+                new RequestMatcherEntry<>(AnyRequestMatcher.INSTANCE, new PermitAllAuthorizationManager<>())
+        );
+
+        return new RequestAuthorizationManager(mappings);
     }
 }

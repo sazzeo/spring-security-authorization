@@ -19,7 +19,6 @@ public class MvcRequestMatcher implements RequestMatcher {
         return new MvcRequestMatcher(Set.of(httpMethod), Set.of(url));
     }
 
-
     public MvcRequestMatcher(final Set<HttpMethod> httpMethods, final Set<String> urls) {
         this.httpMethods = httpMethods;
         this.urls = urls;
