@@ -5,9 +5,7 @@ import nextstep.app.domain.MemberRepository;
 import nextstep.security.authentication.AuthenticationException;
 import nextstep.security.authentication.BasicAuthenticationFilter;
 import nextstep.security.authentication.UsernamePasswordAuthenticationFilter;
-import nextstep.security.authorization.AuthorizationFilter;
-import nextstep.security.authorization.RequestAuthorizationManager;
-import nextstep.security.authorization.SecuredMethodInterceptor;
+import nextstep.security.authorization.*;
 import nextstep.security.config.DefaultSecurityFilterChain;
 import nextstep.security.config.DelegatingFilterProxy;
 import nextstep.security.config.FilterChainProxy;
@@ -44,8 +42,9 @@ public class SecurityConfig {
 
     @Bean
     public SecuredMethodInterceptor securedMethodInterceptor() {
-        return new SecuredMethodInterceptor();
+        return new SecuredMethodInterceptor(new SecuredAuthorizationManager());
     }
+
 //    @Bean
 //    public SecuredAspect securedAspect() {
 //        return new SecuredAspect();

@@ -16,23 +16,19 @@ import java.lang.reflect.Method;
 public class SecuredMethodInterceptor implements MethodInterceptor, PointcutAdvisor, AopInfrastructureBean {
 
     private final Pointcut pointcut;
+    private final SecuredAuthorizationManager securedAuthorizationManager;
 
-    public SecuredMethodInterceptor() {
+    public SecuredMethodInterceptor(final SecuredAuthorizationManager securedAuthorizationManager) {
         this.pointcut = new AnnotationMatchingPointcut(null, Secured.class);
+        this.securedAuthorizationManager = securedAuthorizationManager;
     }
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        Method method = invocation.getMethod();
-        if (method.isAnnotationPresent(Secured.class)) {
-            Secured secured = method.getAnnotation(Secured.class);
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null) {
-                throw new AuthenticationException();
-            }
-            if (!authentication.getAuthorities().contains(secured.value())) {
-                throw new ForbiddenException();
-            }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        var authorizationDecision = securedAuthorizationManager.check(authentication, invocation);
+        if (!authorizationDecision.isSuccess()) {
+            throw new ForbiddenException();
         }
         return invocation.proceed();
     }
