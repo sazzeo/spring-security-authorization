@@ -3,7 +3,8 @@ package nextstep.app.domain;
 import nextstep.security.authorization.GrantedAuthority;
 
 public enum Role implements GrantedAuthority {
-    ADMIN;
+    ADMIN,
+    USER;
 
     @Override
     public String getAuthority() {
