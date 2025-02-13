@@ -3,22 +3,23 @@ package nextstep.security.authorization;
 import jakarta.servlet.http.HttpServletRequest;
 import nextstep.security.authentication.Authentication;
 
+import java.util.Collection;
 import java.util.Set;
 
 public class AuthoritiesAuthorizationManager implements AuthorizationManager<HttpServletRequest> {
 
-    private final Set<String> authorities;
+    private final Collection<GrantedAuthority> authorities;
 
-    private AuthoritiesAuthorizationManager(final Set<String> authorities) {
+    private AuthoritiesAuthorizationManager(final Collection<GrantedAuthority> authorities) {
         this.authorities = authorities;
     }
 
-    public static AuthoritiesAuthorizationManager of(final Set<String> authorities) {
+    public static AuthoritiesAuthorizationManager of(final Collection<GrantedAuthority> authorities) {
         return new AuthoritiesAuthorizationManager(authorities);
     }
 
-    public static AuthoritiesAuthorizationManager of(final String authorities) {
-        return new AuthoritiesAuthorizationManager(Set.of(authorities));
+    public static AuthoritiesAuthorizationManager of(final GrantedAuthority authority) {
+        return new AuthoritiesAuthorizationManager(Set.of(authority));
     }
 
     @Override
