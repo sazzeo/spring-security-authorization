@@ -57,7 +57,7 @@ public class SecurityConfig {
                         new SecurityContextHolderFilter(),
                         new UsernamePasswordAuthenticationFilter(userDetailsService()),
                         new BasicAuthenticationFilter(userDetailsService()),
-                        new AuthorizationFilter(requestAuthorizationManager())
+                        new AuthorizationFilter(requestMatcherDelegatingAuthorizationManager())
                 )
         );
     }
@@ -88,7 +88,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public RequestAuthorizationManager requestAuthorizationManager() {
+    public RequestMatcherDelegatingAuthorizationManager requestMatcherDelegatingAuthorizationManager() {
         List<RequestMatcherEntry<AuthorizationManager<HttpServletRequest>>> mappings = List.of(
                 new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/members/me"), new AuthenticatedAuthorizationManager<>()),
                 new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/members"), AuthoritiesAuthorizationManager.of("ADMIN")),
@@ -96,6 +96,6 @@ public class SecurityConfig {
                 new RequestMatcherEntry<>(AnyRequestMatcher.INSTANCE, new PermitAllAuthorizationManager<>())
         );
 
-        return new RequestAuthorizationManager(mappings);
+        return new RequestMatcherDelegatingAuthorizationManager(mappings);
     }
 }
