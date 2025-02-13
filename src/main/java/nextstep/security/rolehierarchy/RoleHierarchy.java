@@ -1,13 +1,9 @@
-package nextstep.security.userdetails;
+package nextstep.security.rolehierarchy;
 
 import nextstep.security.authorization.GrantedAuthority;
 
 import java.util.Collection;
 
-public interface UserDetails {
-    String getUsername();
-
-    String getPassword();
-
+public interface RoleHierarchy {
     Collection<GrantedAuthority> getAuthorities();
 }

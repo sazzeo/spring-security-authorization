@@ -80,7 +80,7 @@ public class SecurityConfig {
                 }
 
                 @Override
-                public Set<String> getAuthorities() {
+                public Set<GrantedAuthority> getAuthorities() {
                     return member.getRoles();
                 }
             };
