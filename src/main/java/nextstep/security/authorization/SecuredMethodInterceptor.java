@@ -15,9 +15,9 @@ public class SecuredMethodInterceptor implements MethodInterceptor, PointcutAdvi
     private final Pointcut pointcut;
     private final AuthorizationManager<MethodInvocation> authorizationManager;
 
-    public SecuredMethodInterceptor(final AuthorizationManager<MethodInvocation> securedAuthorizationManager) {
+    public SecuredMethodInterceptor() {
         this.pointcut = new AnnotationMatchingPointcut(null, Secured.class);
-        this.authorizationManager = securedAuthorizationManager;
+        this.authorizationManager = new SecuredAuthorizationManager();
     }
 
     @Override

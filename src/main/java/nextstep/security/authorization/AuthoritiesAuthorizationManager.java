@@ -5,20 +5,20 @@ import nextstep.security.authentication.Authentication;
 
 import java.util.Set;
 
-public class AuthorityAuthorizationManager implements AuthorizationManager<HttpServletRequest> {
+public class AuthoritiesAuthorizationManager implements AuthorizationManager<HttpServletRequest> {
 
     private final Set<String> authorities;
 
-    private AuthorityAuthorizationManager(final Set<String> authorities) {
+    private AuthoritiesAuthorizationManager(final Set<String> authorities) {
         this.authorities = authorities;
     }
 
-    public static AuthorityAuthorizationManager of(final Set<String> authorities) {
-        return new AuthorityAuthorizationManager(authorities);
+    public static AuthoritiesAuthorizationManager of(final Set<String> authorities) {
+        return new AuthoritiesAuthorizationManager(authorities);
     }
 
-    public static AuthorityAuthorizationManager of(final String authorities) {
-        return new AuthorityAuthorizationManager(Set.of(authorities));
+    public static AuthoritiesAuthorizationManager of(final String authorities) {
+        return new AuthoritiesAuthorizationManager(Set.of(authorities));
     }
 
     @Override

@@ -6,7 +6,6 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import nextstep.security.authentication.Authentication;
 import nextstep.security.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -24,6 +23,10 @@ public class AuthorizationFilter extends GenericFilterBean {
         var httpServletRequest = (HttpServletRequest) servletRequest;
         var httpServletResponse = (HttpServletResponse) servletResponse;
         var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
         var authorizationDecision = authorizationManager.check(authentication, httpServletRequest);
         if (!authorizationDecision.isSuccess()) {
             httpServletResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);

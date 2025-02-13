@@ -47,9 +47,8 @@ public class SecurityConfig {
 
     @Bean
     public SecuredMethodInterceptor securedMethodInterceptor() {
-        return new SecuredMethodInterceptor(new SecuredAuthorizationManager());
+        return new SecuredMethodInterceptor();
     }
-
 
     @Bean
     public SecurityFilterChain securityFilterChain() {
@@ -92,7 +91,7 @@ public class SecurityConfig {
     public RequestAuthorizationManager requestAuthorizationManager() {
         List<RequestMatcherEntry<AuthorizationManager<HttpServletRequest>>> mappings = List.of(
                 new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/members/me"), new AuthenticatedAuthorizationManager<>()),
-                new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/members"), AuthorityAuthorizationManager.of("ADMIN")),
+                new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/members"), AuthoritiesAuthorizationManager.of("ADMIN")),
                 new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/search"), new PermitAllAuthorizationManager<>()),
                 new RequestMatcherEntry<>(AnyRequestMatcher.INSTANCE, new PermitAllAuthorizationManager<>())
         );
