@@ -14,12 +14,13 @@ class RoleHierarchyImplTest {
 
 
     @Test
-    @DisplayName("failTest")
+    @DisplayName("successTest")
     void successTest() {
         var roleHierarchyImpl = new RoleHierarchyImpl(Set.of(
                 new RoleRelation(TestGrantedAuthority.ROLE_A, TestGrantedAuthority.ROLE_B),
                 new RoleRelation(TestGrantedAuthority.ROLE_B, TestGrantedAuthority.ROLE_C),
-                new RoleRelation(TestGrantedAuthority.ROLE_C, TestGrantedAuthority.ROLE_D)
+                new RoleRelation(TestGrantedAuthority.ROLE_C, TestGrantedAuthority.ROLE_D),
+                new RoleRelation(TestGrantedAuthority.ROLE_D, TestGrantedAuthority.ROLE_E)
         ));
         var roles = roleHierarchyImpl.getReachableGrantedAuthorities(List.of(TestGrantedAuthority.ROLE_A));
         assertThat(roles).containsOnly(
@@ -44,6 +45,7 @@ class RoleHierarchyImplTest {
         ROLE_B,
         ROLE_C,
         ROLE_D,
+        ROLE_E,
         ;
 
         @Override
