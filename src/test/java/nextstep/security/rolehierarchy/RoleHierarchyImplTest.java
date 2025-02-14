@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.*;
+
 class RoleHierarchyImplTest {
 
 
@@ -17,10 +19,10 @@ class RoleHierarchyImplTest {
         var roleHierarchyImpl = new RoleHierarchyImpl(Set.of(
                 new RoleRelation(TestGrantedAuthority.ROLE_A, TestGrantedAuthority.ROLE_B),
                 new RoleRelation(TestGrantedAuthority.ROLE_B, TestGrantedAuthority.ROLE_C),
-                new RoleRelation(TestGrantedAuthority.ROLE_B, TestGrantedAuthority.ROLE_D)
+                new RoleRelation(TestGrantedAuthority.ROLE_C, TestGrantedAuthority.ROLE_D)
         ));
         var roles = roleHierarchyImpl.getReachableGrantedAuthorities(List.of(TestGrantedAuthority.ROLE_A));
-        Assertions.assertThat(roles).containsOnly(
+        assertThat(roles).containsOnly(
                 TestGrantedAuthority.ROLE_A,
                 TestGrantedAuthority.ROLE_B,
                 TestGrantedAuthority.ROLE_C,
