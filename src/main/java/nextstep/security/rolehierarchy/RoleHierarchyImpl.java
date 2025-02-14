@@ -12,7 +12,6 @@ public class RoleHierarchyImpl implements RoleHierarchy {
         this.grantMap = new HashMap<>();
         buildRoleHierarchy(roleRelations);
         addSelf(roleRelations);
-        System.out.println();
     }
 
     private void buildRoleHierarchy(Collection<RoleRelation> roleRelations) {

@@ -6,7 +6,7 @@ import nextstep.security.authentication.Authentication;
 import java.util.Collection;
 import java.util.Set;
 
-public class AuthoritiesAuthorizationManager implements AuthorizationManager<HttpServletRequest> {
+public class AuthoritiesAuthorizationManager implements AuthorizationManager<Collection<String>> {
 
     private final Collection<GrantedAuthority> authorities;
 
