@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.http.HttpMethod;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -90,9 +91,9 @@ public class SecurityConfig {
 
     @Bean
     public RequestMatcherDelegatingAuthorizationManager requestMatcherDelegatingAuthorizationManager() {
-        List<RequestMatcherEntry<AuthorizationManager<HttpServletRequest>>> mappings = List.of(
+        List<RequestMatcherEntry<AuthorizationManager<RequestAuthorizationContext<Collection<GrantedAuthority>>>>> mappings = List.of(
                 new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/members/me"), new AuthenticatedAuthorizationManager<>()),
-                new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/members"), AuthoritiesAuthorizationManager.of(Role.ADMIN)),
+                new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/members"), new AuthoritiesAuthorizationManager()),
                 new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/search"), new PermitAllAuthorizationManager<>()),
                 new RequestMatcherEntry<>(AnyRequestMatcher.INSTANCE, new PermitAllAuthorizationManager<>())
         );

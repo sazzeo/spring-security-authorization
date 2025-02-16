@@ -10,11 +10,12 @@ import nextstep.security.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
+import java.util.Collection;
 
 public class AuthorizationFilter extends GenericFilterBean {
-    private final AuthorizationManager<HttpServletRequest> authorizationManager;
+    private final AuthorizationManager<RequestAuthorizationContext<Collection<GrantedAuthority>>> authorizationManager;
 
-    public AuthorizationFilter(AuthorizationManager<HttpServletRequest> authorizationManager) {
+    public AuthorizationFilter(AuthorizationManager<RequestAuthorizationContext<Collection<GrantedAuthority>>> authorizationManager) {
         this.authorizationManager = authorizationManager;
     }
 
@@ -27,7 +28,8 @@ public class AuthorizationFilter extends GenericFilterBean {
             httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
-        var authorizationDecision = authorizationManager.check(authentication, httpServletRequest);
+
+        var authorizationDecision = authorizationManager.check(authentication, new RequestAuthorizationAuthoritiesContext(httpServletRequest, authentication.getAuthorities()));
         if (!authorizationDecision.isSuccess()) {
             httpServletResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return;
