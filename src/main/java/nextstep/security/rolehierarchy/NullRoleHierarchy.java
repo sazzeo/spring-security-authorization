@@ -7,7 +7,7 @@ import java.util.Collection;
 public class NullRoleHierarchy implements RoleHierarchy {
 
     @Override
-    public Collection<GrantedAuthority> getReachableGrantedAuthorities(Collection<GrantedAuthority> grantedAuthorities) {
+    public Collection<? extends GrantedAuthority> getReachableGrantedAuthorities(Collection<? extends GrantedAuthority> grantedAuthorities) {
         return grantedAuthorities;
     }
 

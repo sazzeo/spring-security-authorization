@@ -1,57 +1,94 @@
 package nextstep.security.rolehierarchy;
 
 import nextstep.security.authorization.GrantedAuthority;
+import nextstep.security.grant.SimpleGrantedAuthority;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class RoleHierarchyImpl implements RoleHierarchy {
-    private final Map<GrantedAuthority, Set<GrantedAuthority>> grantMap;
+    private Map<String, Set<GrantedAuthority>> rolesReachableInOneStepMap = null;
+    private String roleHierarchyStringRepresentation = null;
+    private Map<String, Set<GrantedAuthority>> rolesReachableInOneOrMoreStepsMap = null;
 
-    public RoleHierarchyImpl(final Collection<RoleRelation> roleRelations) {
-        this.grantMap = new HashMap<>();
-        buildRoleHierarchy(roleRelations);
-        addSelf(roleRelations);
-    }
+    public static final List<GrantedAuthority> NO_AUTHORITIES = Collections.emptyList();
 
-    private void buildRoleHierarchy(Collection<RoleRelation> roleRelations) {
-        for (RoleRelation relation : roleRelations) {
-            grantMap.computeIfAbsent(relation.parentRole(), k -> new HashSet<>())
-                    .add(relation.childRole());
-        }
-
-        grantMap.forEach((key, values) -> {
-            values.forEach((value) -> {
-                var childChildren = grantMap.get(value);
-                if (childChildren != null) {
-                    grantMap.get(key).addAll(childChildren);
-                }
-            });
-        });
-    }
-
-    private void addSelf(Collection<RoleRelation> roleRelations) {
-        roleRelations.stream()
-                .flatMap(it -> it.getAllRoles().stream())
-                .forEach(it -> {
-                    var values = grantMap.get(it);
-                    if (values != null) {
-                        values.add(it);
-                    }
-                    if (values == null) {
-                        grantMap.put(it, Set.of(it));
-                    }
-                });
+    public void setHierarchy(String roleHierarchyStringRepresentation) {
+        this.roleHierarchyStringRepresentation = roleHierarchyStringRepresentation;
+        buildRolesReachableInOneStepMap();
+        buildRolesReachableInOneOrMoreStepsMap();
     }
 
     @Override
-    public Collection<GrantedAuthority> getReachableGrantedAuthorities(Collection<GrantedAuthority> grantedAuthorities) {
-        return grantedAuthorities.stream()
-                .map(grantMap::get)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet())
-                ;
+    public Collection<GrantedAuthority> getReachableGrantedAuthorities(
+            Collection<? extends GrantedAuthority> authorities) {
+        if (authorities == null || authorities.isEmpty()) {
+            return NO_AUTHORITIES;
+        }
+
+        Set<GrantedAuthority> reachableRoles = new HashSet<>();
+        Set<String> processedNames = new HashSet<>();
+        for (GrantedAuthority authority : authorities) {
+            if (authority.getAuthority() == null) {
+                reachableRoles.add(authority);
+                continue;
+            }
+            if (!processedNames.add(authority.getAuthority())) {
+                continue;
+            }
+            reachableRoles.add(authority);
+            Set<GrantedAuthority> lowerRoles = this.rolesReachableInOneOrMoreStepsMap.get(authority.getAuthority());
+            if (lowerRoles == null) {
+                continue;
+            }
+            for (GrantedAuthority role : lowerRoles) {
+                if (processedNames.add(role.getAuthority())) {
+                    reachableRoles.add(role);
+                }
+            }
+        }
+        return new ArrayList<>(reachableRoles);
+    }
+
+
+    private void buildRolesReachableInOneStepMap() {
+        this.rolesReachableInOneStepMap = new HashMap<>();
+        for (String line : this.roleHierarchyStringRepresentation.split("\n")) {
+            String[] roles = line.trim().split("\\s+>\\s+");
+            for (int i = 1; i < roles.length; i++) {
+                String higherRole = roles[i - 1];
+                GrantedAuthority lowerRole = new SimpleGrantedAuthority(roles[i]);
+                Set<GrantedAuthority> rolesReachableInOneStepSet;
+                if (!this.rolesReachableInOneStepMap.containsKey(higherRole)) {
+                    rolesReachableInOneStepSet = new HashSet<>();
+                    this.rolesReachableInOneStepMap.put(higherRole, rolesReachableInOneStepSet);
+                } else {
+                    rolesReachableInOneStepSet = this.rolesReachableInOneStepMap.get(higherRole);
+                }
+                rolesReachableInOneStepSet.add(lowerRole);
+            }
+        }
+    }
+
+    private void buildRolesReachableInOneOrMoreStepsMap() {
+        this.rolesReachableInOneOrMoreStepsMap = new HashMap<>();
+        for (String roleName : this.rolesReachableInOneStepMap.keySet()) {
+            Set<GrantedAuthority> rolesToVisitSet = new HashSet<>(this.rolesReachableInOneStepMap.get(roleName));
+            Set<GrantedAuthority> visitedRolesSet = new HashSet<>();
+            while (!rolesToVisitSet.isEmpty()) {
+                GrantedAuthority lowerRole = rolesToVisitSet.iterator().next();
+                rolesToVisitSet.remove(lowerRole);
+                if (!visitedRolesSet.add(lowerRole)
+                        || !this.rolesReachableInOneStepMap.containsKey(lowerRole.getAuthority())) {
+                    continue;
+                } else if (roleName.equals(lowerRole.getAuthority())) {
+                    throw new IllegalArgumentException("ROLE 계층 순환참조 에러");
+                }
+                rolesToVisitSet.addAll(this.rolesReachableInOneStepMap.get(lowerRole.getAuthority()));
+            }
+            this.rolesReachableInOneOrMoreStepsMap.put(roleName, visitedRolesSet);
+        }
 
     }
+
 
 }
