@@ -1,20 +1,20 @@
 package nextstep.security.rolehierarchy;
 
 import nextstep.security.authorization.GrantedAuthority;
-import nextstep.security.grant.SimpleGrantedAuthority;
 
 import java.util.*;
 
 public class RoleHierarchyImpl implements RoleHierarchy {
 
-    public static final List<GrantedAuthority> NO_AUTHORITIES = Collections.emptyList();
-
-    private final String roleHierarchyStringRepresentation;
+    private static final List<GrantedAuthority> NO_AUTHORITIES = Collections.emptyList();
+    private final GrantedAuthority role;
+    private final GrantedAuthority implies;
     private Map<String, Set<GrantedAuthority>> rolesReachableInOneStepMap = null;
     private Map<String, Set<GrantedAuthority>> rolesReachableInOneOrMoreStepsMap = null;
 
-    private RoleHierarchyImpl(String roleHierarchyStringRepresentation) {
-        this.roleHierarchyStringRepresentation = roleHierarchyStringRepresentation;
+    private RoleHierarchyImpl(GrantedAuthority role, GrantedAuthority implies) {
+        this.role = role;
+        this.implies = implies;
         buildRolesReachableInOneStepMap();
         buildRolesReachableInOneOrMoreStepsMap();
     }
@@ -39,7 +39,7 @@ public class RoleHierarchyImpl implements RoleHierarchy {
         }
 
         public RoleHierarchyImpl build() {
-            return new RoleHierarchyImpl(String.format("%s > %s", role, implies));
+            return new RoleHierarchyImpl(role, implies);
         }
     }
 
@@ -78,21 +78,10 @@ public class RoleHierarchyImpl implements RoleHierarchy {
 
     private void buildRolesReachableInOneStepMap() {
         this.rolesReachableInOneStepMap = new HashMap<>();
-        for (String line : this.roleHierarchyStringRepresentation.split("\n")) {
-            String[] roles = line.trim().split("\\s+>\\s+");
-            for (int i = 1; i < roles.length; i++) {
-                String higherRole = roles[i - 1];
-                GrantedAuthority lowerRole = new SimpleGrantedAuthority(roles[i]);
-                Set<GrantedAuthority> rolesReachableInOneStepSet;
-                if (!this.rolesReachableInOneStepMap.containsKey(higherRole)) {
-                    rolesReachableInOneStepSet = new HashSet<>();
-                    this.rolesReachableInOneStepMap.put(higherRole, rolesReachableInOneStepSet);
-                } else {
-                    rolesReachableInOneStepSet = this.rolesReachableInOneStepMap.get(higherRole);
-                }
-                rolesReachableInOneStepSet.add(lowerRole);
-            }
-        }
+        Set<GrantedAuthority> rolesReachableInOneStepSet;
+        rolesReachableInOneStepSet = new HashSet<>();
+        this.rolesReachableInOneStepMap.put(role.getAuthority(), rolesReachableInOneStepSet);
+        rolesReachableInOneStepSet.add(implies);
     }
 
     private void buildRolesReachableInOneOrMoreStepsMap() {
