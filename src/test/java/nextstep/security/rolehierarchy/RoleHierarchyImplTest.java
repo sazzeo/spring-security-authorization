@@ -27,7 +27,7 @@ class RoleHierarchyImplTest {
 
     @Test
     @DisplayName("implies는 role 의 권한을 포함하지 않는다")
-    void failTest() {
+    void successTest2() {
         var roleHierarchyImpl = RoleHierarchyImpl.with()
                 .role(TestGrantedAuthority.ROLE_A)
                 .implies(TestGrantedAuthority.ROLE_B)
@@ -37,6 +37,21 @@ class RoleHierarchyImplTest {
                 TestGrantedAuthority.ROLE_B);
 
     }
+
+    @Test
+    @DisplayName("계층구조가 설정된 게 없으면 본인을 반환한다.")
+    void successTest3() {
+        var roleHierarchyImpl = RoleHierarchyImpl.with()
+                .role(TestGrantedAuthority.ROLE_A)
+                .implies(TestGrantedAuthority.ROLE_B)
+                .build();
+        var roles = roleHierarchyImpl
+                .getReachableGrantedAuthorities(List.of(TestGrantedAuthority.ROLE_C));
+        assertThat(roles).containsOnly(
+                TestGrantedAuthority.ROLE_C);
+
+    }
+
 
     private enum TestGrantedAuthority implements GrantedAuthority {
         ROLE_A,
