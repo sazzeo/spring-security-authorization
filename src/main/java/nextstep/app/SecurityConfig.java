@@ -16,6 +16,8 @@ import nextstep.security.context.SecurityContextHolderFilter;
 import nextstep.security.requestmatcher.AnyRequestMatcher;
 import nextstep.security.requestmatcher.MvcRequestMatcher;
 import nextstep.security.requestmatcher.RequestMatcherEntry;
+import nextstep.security.rolehierarchy.RoleHierarchy;
+import nextstep.security.rolehierarchy.RoleHierarchyImpl;
 import nextstep.security.userdetails.UserDetails;
 import nextstep.security.userdetails.UserDetailsService;
 import org.springframework.context.annotation.Bean;
@@ -93,11 +95,18 @@ public class SecurityConfig {
     public RequestMatcherDelegatingAuthorizationManager requestMatcherDelegatingAuthorizationManager() {
         List<RequestMatcherEntry<AuthorizationManager<RequestAuthorizationContext<Collection<GrantedAuthority>>>>> mappings = List.of(
                 new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/members/me"), new AuthenticatedAuthorizationManager<>()),
-                new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/members"), new AuthoritiesAuthorizationManager()),
+                new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/members"), new AuthoritiesAuthorizationManager(roleHierarchy())),
                 new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/search"), new PermitAllAuthorizationManager<>()),
                 new RequestMatcherEntry<>(AnyRequestMatcher.INSTANCE, new PermitAllAuthorizationManager<>())
         );
 
         return new RequestMatcherDelegatingAuthorizationManager(mappings);
+    }
+
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.with()
+                .role(Role.ADMIN).implies(Role.USER)
+                .build();
     }
 }

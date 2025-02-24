@@ -1,14 +1,22 @@
 package nextstep.security.authorization;
 
 import nextstep.security.authentication.Authentication;
+import nextstep.security.rolehierarchy.RoleHierarchy;
 
 import java.util.Collection;
 
 public class AuthoritiesAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext<Collection<GrantedAuthority>>> {
 
+    private final RoleHierarchy roleHierarchy;
+
+    public AuthoritiesAuthorizationManager(RoleHierarchy roleHierarchy) {
+        this.roleHierarchy = roleHierarchy;
+    }
+
     @Override
     public AuthorizationDecision check(final Authentication authentication, final RequestAuthorizationContext<Collection<GrantedAuthority>> context) {
-        var authorities = authentication.getAuthorities();
+        var authorities = roleHierarchy.getReachableGrantedAuthorities(authentication.getAuthorities());
+
         var matchAuthority = context.getOthers()
                 .stream()
                 .anyMatch(authorities::contains);
