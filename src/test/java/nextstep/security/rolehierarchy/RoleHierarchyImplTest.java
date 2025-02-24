@@ -14,12 +14,15 @@ class RoleHierarchyImplTest {
     @Test
     @DisplayName("successTest")
     void successTest() {
-        var roleHierarchyImpl = new RoleHierarchyImpl();
-        roleHierarchyImpl.setHierarchy("ROLE_A > ROLE_B > ROLE_C");
-        var roles = roleHierarchyImpl.getReachableGrantedAuthorities(List.of(TestGrantedAuthority.ROLE_A));
+        var roleHierarchyImpl = RoleHierarchyImpl.with()
+                .role(TestGrantedAuthority.ROLE_A).implies(TestGrantedAuthority.ROLE_B)
+                .build();
+
+        var roles = roleHierarchyImpl.getReachableGrantedAuthorities(List.of(TestGrantedAuthority.ROLE_A))
+                .stream().map(GrantedAuthority::getAuthority);
         assertThat(roles).containsOnly(
-                TestGrantedAuthority.ROLE_A,
-                TestGrantedAuthority.ROLE_B);
+                TestGrantedAuthority.ROLE_A.name(),
+                TestGrantedAuthority.ROLE_B.name());
     }
 
     @Test

@@ -6,17 +6,43 @@ import nextstep.security.grant.SimpleGrantedAuthority;
 import java.util.*;
 
 public class RoleHierarchyImpl implements RoleHierarchy {
-    private Map<String, Set<GrantedAuthority>> rolesReachableInOneStepMap = null;
-    private String roleHierarchyStringRepresentation = null;
-    private Map<String, Set<GrantedAuthority>> rolesReachableInOneOrMoreStepsMap = null;
 
     public static final List<GrantedAuthority> NO_AUTHORITIES = Collections.emptyList();
 
-    public void setHierarchy(String roleHierarchyStringRepresentation) {
+    private final String roleHierarchyStringRepresentation;
+    private Map<String, Set<GrantedAuthority>> rolesReachableInOneStepMap = null;
+    private Map<String, Set<GrantedAuthority>> rolesReachableInOneOrMoreStepsMap = null;
+
+    private RoleHierarchyImpl(String roleHierarchyStringRepresentation) {
         this.roleHierarchyStringRepresentation = roleHierarchyStringRepresentation;
         buildRolesReachableInOneStepMap();
         buildRolesReachableInOneOrMoreStepsMap();
     }
+
+    public static RoleHierarchyImplBuilder with() {
+        return new RoleHierarchyImplBuilder();
+    }
+
+    public static class RoleHierarchyImplBuilder {
+
+        private GrantedAuthority role;
+        private GrantedAuthority implies;
+
+        public RoleHierarchyImplBuilder role(final GrantedAuthority role) {
+            this.role = role;
+            return this;
+        }
+
+        public RoleHierarchyImplBuilder implies(final GrantedAuthority implies) {
+            this.implies = implies;
+            return this;
+        }
+
+        public RoleHierarchyImpl build() {
+            return new RoleHierarchyImpl(String.format("%s > %s", role, implies));
+        }
+    }
+
 
     @Override
     public Collection<GrantedAuthority> getReachableGrantedAuthorities(
