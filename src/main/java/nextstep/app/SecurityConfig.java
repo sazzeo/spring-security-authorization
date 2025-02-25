@@ -93,10 +93,11 @@ public class SecurityConfig {
 
     @Bean
     public RequestMatcherDelegatingAuthorizationManager requestMatcherDelegatingAuthorizationManager() {
-        List<RequestMatcherEntry<AuthorizationManager<RequestAuthorizationContext<Collection<GrantedAuthority>>>>> mappings = List.of(
+        List<RequestMatcherEntry<AuthorizationManager<HttpServletRequest>>> mappings = List.of(
                 new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/members/me"), new AuthenticatedAuthorizationManager<>()),
-                new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/members"), new AuthoritiesAuthorizationManager(roleHierarchy())),
+                new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/members"), new AuthorityAuthorizationManager<>(Set.of(Role.ADMIN), roleHierarchy())),
                 new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/search"), new PermitAllAuthorizationManager<>()),
+                new RequestMatcherEntry<>(MvcRequestMatcher.of(HttpMethod.GET, "/user"), new AuthorityAuthorizationManager<>(Set.of(Role.USER), roleHierarchy())),
                 new RequestMatcherEntry<>(AnyRequestMatcher.INSTANCE, new PermitAllAuthorizationManager<>())
         );
 
