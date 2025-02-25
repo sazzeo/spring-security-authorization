@@ -5,7 +5,7 @@ import nextstep.security.rolehierarchy.RoleHierarchy;
 
 import java.util.Collection;
 
-public class AuthoritiesAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext<Collection<GrantedAuthority>>> {
+public class AuthoritiesAuthorizationManager implements AuthorizationManager<Collection<? extends GrantedAuthority>> {
 
     private final RoleHierarchy roleHierarchy;
 
@@ -14,11 +14,9 @@ public class AuthoritiesAuthorizationManager implements AuthorizationManager<Req
     }
 
     @Override
-    public AuthorizationDecision check(final Authentication authentication, final RequestAuthorizationContext<Collection<GrantedAuthority>> context) {
+    public AuthorizationDecision check(final Authentication authentication, final Collection<? extends GrantedAuthority> context) {
         var authorities = roleHierarchy.getReachableGrantedAuthorities(authentication.getAuthorities());
-
-        var matchAuthority = context.getOthers()
-                .stream()
+        var matchAuthority = context.stream()
                 .anyMatch(authorities::contains);
         if (!matchAuthority) {
             return AuthorizationDecision.fail();
